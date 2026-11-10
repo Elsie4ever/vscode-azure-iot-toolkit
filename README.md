@@ -185,3 +185,73 @@ Thanks to all the [contributors](https://github.com/Microsoft/vscode-azure-iot-t
 ## Data/Telemetry
 This project collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](http://go.microsoft.com/fwlink/?LinkId=521839) to learn more. 
 If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
+# WoT Thing Model authoring (prototype)
+
+Requires VS Code 1.90 or later. Run **WoT: Create Schema Folder** to create
+`wot/schemas` and `wot/models` in the selected workspace folder. These paths
+can be changed per workspace folder with `azure-iot-toolkit.wot.schemaFolder`
+and `azure-iot-toolkit.wot.modelFolder`; paths must remain workspace-relative.
+
+Thing Models use `*.tm.json`. The bundled official W3C schema provides offline
+validation, completion, and hover immediately on open. See
+[schema attribution](resources/wot/NOTICE.txt).
+This prototype authors Thing Models only, not Thing Descriptions or TM-to-TD output.
+Each generation supplies a fresh, unique absolute model ID (`urn:uuid:<UUID>`)
+in both Copilot and non-Copilot output. The converter keeps this caller-supplied
+ID deterministic, and Copilot must preserve it. Even if repair retries are
+exhausted, the saved model retains the baseline ID. Regenerating a model creates
+a new ID; retain the previous ID manually when updating an already registered model.
+For older generated files without an ID, add a unique absolute `id` (for example
+`"id": "urn:example:thermostat"`) or regenerate before uploading.
+
+Thing Models also receive live **WoT** error diagnostics on open, save, and
+while editing (debounced by 300 ms). Missing or invalid absolute IDs produce
+red squiggles and Problems entries; a missing ID is highlighted at the opening
+brace, and an invalid ID is highlighted at its value. This is an uploader
+compatibility rule, not a change to the bundled official W3C schema.
+The same live pass checks the TM schema, context, and type. Unrelated JSON
+files are not checked. Fixes clear the errors without regenerating the model.
+
+Save a draft-07 or 2020-12 JSON Schema in the schema folder. With that file
+active, run **WoT: Generate Thing Model (without Copilot)**. The deterministic
+converter opens `<modelFolder>/<schema-name>.tm.json` and offers a conversion
+report. Existing output prompts for overwrite or a numbered copy.
+Known measurements become observable read-only properties, state is read-only,
+settings are writable, and `alertActive` becomes an `alert` event. Asset and
+message metadata are suggested omissions, recorded in the report. Unknown
+fields stay read-only and are flagged for review. Units use plain strings.
+Local references are inlined; recursive or remote references and unsupported
+keywords are reported for manual review. No remote schema is fetched.
+
+## Generate using Copilot
+
+Creating or saving a JSON Schema in the schema folder offers **Generate Thing
+Model using Copilot?** once per file. Choose **Generate Thing Model** to send
+the schema and deterministic baseline to Copilot. The same flow is available
+from the file's Explorer context menu, editor title menu, and CodeLens.
+Only JSON Schemas inside the configured schema folder are eligible.
+
+Generation is cancellable and validates the response against the bundled
+schema, source-field coverage, model ID, and baseline types (including nested fields).
+Output is self-contained properties and event data; AI-added actions and
+referenced definitions are reported as unsupported.
+It allows at most two repair retries. If problems remain, the best parseable
+attempt is still opened with generation warnings in Problems and a **View
+report** action. If every response is malformed, the baseline is opened with
+an explicit warning instead. Dropped-field explanations stay in the report,
+not in the saved model. Generation warnings clear when the output is edited;
+the built-in JSON schema diagnostics continue to work.
+
+Copilot requires model access and consent. When unavailable, the extension
+explains the failure and offers the non-Copilot baseline; it does not silently
+substitute one. Set `azure-iot-toolkit.wot.ai.enabled` to `false` to hide Copilot
+entries. **Don't ask again** disables
+`azure-iot-toolkit.wot.promptOnNewSchema` for that workspace folder. **Not now**
+or dismissing the prompt suppresses repeat prompts for that file.
+No generation runs automatically, and telemetry never includes schema/model
+content. Device-type grouping, templates, composition, and reference resolution
+are deferred beyond this first end-to-end prototype (M1–M3).
+
+The default schema folder has a narrow `workspaceContains:wot/schemas/*.json`
+activation event. Custom schema folders rely on another activation trigger
+(including this extension's existing startup activation or a WoT command).

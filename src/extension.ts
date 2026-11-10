@@ -25,12 +25,14 @@ import { DeviceTwinCodeLensProvider } from "./providers/deviceTwinCodeLensProvid
 import { ModuleTwinCodeLensProvider } from "./providers/moduleTwinCodeLensProvider";
 import { TelemetryClient } from "./telemetryClient";
 import { Utility } from "./utility";
+import { registerWot } from "./wot/vscode/register";
 
 export function activate(context: vscode.ExtensionContext) {
     Constants.initialize(context);
     CredentialStore.initialize(context);
     TelemetryClient.initialize(context);
     TelemetryClient.sendEvent("extensionActivated");
+    registerWot(context);
 
     // Register Azure sign-in command (replaces azure-account.login)
     context.subscriptions.push(vscode.commands.registerCommand("azure-iot-toolkit.signInToAzure", async () => {

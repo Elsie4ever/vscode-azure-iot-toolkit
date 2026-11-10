@@ -1,4 +1,11 @@
 {
+  "azure-iot-toolkit.wot.generateWithCopilot.title": "Generate Thing Model using Copilot",
+  "azure-iot-toolkit.wot.ai.enabled.description": "Enable WoT Copilot generation commands. Schema content is sent only after explicitly choosing Generate.",
+  "azure-iot-toolkit.wot.promptOnNewSchema.description": "Offer Copilot generation once for each JSON Schema created or saved in the schema folder.",
+  "azure-iot-toolkit.wot.generate.title": "Generate Thing Model (without Copilot)",
+  "azure-iot-toolkit.wot.createSchemaFolder.title": "Create Schema Folder",
+  "azure-iot-toolkit.wot.schemaFolder.description": "Workspace-relative folder containing JSON Schemas for Thing Model generation.",
+  "azure-iot-toolkit.wot.modelFolder.description": "Workspace-relative output folder for WoT Thing Models (*.tm.json).",
   "azure-iot-toolkit.name": "Azure IoT Hub",
   "azure-iot-toolkit.category": "Azure IoT Hub",
   "azure-iot-toolkit.category-edge": "Azure IoT Edge",

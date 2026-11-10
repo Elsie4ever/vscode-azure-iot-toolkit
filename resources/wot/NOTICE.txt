@@ -1,0 +1,12 @@
+W3C Thing Model validation schema
+
+Source: https://github.com/w3c/wot-resources/blob/main/td/v1.1/validation/tm-json-schema-validation.json
+Upstream version: 1.1-12-March-2025
+Retrieved: 2026-11-09
+
+Copyright W3C.
+Distributed under the W3C Software and Document License:
+https://www.w3.org/copyright/software-license-2023/
+See W3C-LICENSE.txt for the license text.
+
+The schema is bundled unmodified and does not require network access.

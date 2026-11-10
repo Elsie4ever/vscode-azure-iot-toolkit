@@ -7,7 +7,7 @@
   "aiKey": "0caaff90-cc1c-4def-b64c-3ef33615bc9b",
   "icon": "logo.png",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.90.0"
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "repository": {
@@ -31,6 +31,7 @@
     "dps"
   ],
   "activationEvents": [
+    "workspaceContains:wot/schemas/*.json",
     "onStartupFinished",
     "onView:iotHubDevices",
     "onView:iotDpsExplorer",
@@ -79,6 +80,12 @@
   ],
   "main": "./dist/extension",
   "contributes": {
+    "jsonValidation": [
+      {
+        "fileMatch": ["*.tm.json"],
+        "url": "./resources/wot/tm-json-schema-validation.json"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -107,6 +114,21 @@
       ]
     },
     "commands": [
+      {
+        "command": "azure-iot-toolkit.wot.generateWithCopilot",
+        "title": "%azure-iot-toolkit.wot.generateWithCopilot.title%",
+        "category": "WoT"
+      },
+      {
+        "command": "azure-iot-toolkit.wot.generate",
+        "title": "%azure-iot-toolkit.wot.generate.title%",
+        "category": "WoT"
+      },
+      {
+        "command": "azure-iot-toolkit.wot.createSchemaFolder",
+        "title": "%azure-iot-toolkit.wot.createSchemaFolder.title%",
+        "category": "WoT"
+      },
       {
         "command": "azure-iot-toolkit.sendD2CMessage",
         "title": "%azure-iot-toolkit.command.sendD2CMessage.title%",
@@ -351,6 +373,18 @@
       }
     ],
     "menus": {
+      "editor/title": [
+        {
+          "command": "azure-iot-toolkit.wot.generateWithCopilot",
+          "when": "resourcePath in azure-iot-toolkit.wot.schemaFiles && config.azure-iot-toolkit.wot.ai.enabled",
+          "group": "wot@1"
+        },
+        {
+          "command": "azure-iot-toolkit.wot.generate",
+          "when": "resourcePath in azure-iot-toolkit.wot.schemaFiles",
+          "group": "wot@2"
+        }
+      ],
       "view/title": [
         {
           "command": "azure-iot-toolkit.refresh",
@@ -713,6 +747,16 @@
       ],
       "explorer/context": [
         {
+          "command": "azure-iot-toolkit.wot.generateWithCopilot",
+          "when": "resourcePath in azure-iot-toolkit.wot.schemaFiles && config.azure-iot-toolkit.wot.ai.enabled",
+          "group": "wot@1"
+        },
+        {
+          "command": "azure-iot-toolkit.wot.generate",
+          "when": "resourcePath in azure-iot-toolkit.wot.schemaFiles",
+          "group": "wot@2"
+        },
+        {
           "when": "resourceFilename =~ /^deployment(?!.*\\.template\\.json)(\\.debug)?(\\..+)*\\.json$/",
           "command": "azure-iot-toolkit.createDeployment",
           "group": "azure-iot-toolkit-edge@0 "
@@ -724,6 +768,10 @@
         }
       ],
       "commandPalette": [
+        {
+          "command": "azure-iot-toolkit.wot.generateWithCopilot",
+          "when": "config.azure-iot-toolkit.wot.ai.enabled"
+        },
         {
           "command": "azure-iot-toolkit.getModuleTwin",
           "when": "never"
@@ -774,6 +822,30 @@
       "type": "object",
       "title": "%azure-iot-toolkit.configuration.title%",
       "properties": {
+        "azure-iot-toolkit.wot.ai.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "%azure-iot-toolkit.wot.ai.enabled.description%"
+        },
+        "azure-iot-toolkit.wot.promptOnNewSchema": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "%azure-iot-toolkit.wot.promptOnNewSchema.description%"
+        },
+        "azure-iot-toolkit.wot.schemaFolder": {
+          "type": "string",
+          "default": "wot/schemas",
+          "scope": "resource",
+          "description": "%azure-iot-toolkit.wot.schemaFolder.description%"
+        },
+        "azure-iot-toolkit.wot.modelFolder": {
+          "type": "string",
+          "default": "wot/models",
+          "scope": "resource",
+          "description": "%azure-iot-toolkit.wot.modelFolder.description%"
+        },
         "azure-iot-toolkit.deviceConnectionString": {
           "type": "string",
           "default": "<<insert your Device Connection String>>",
@@ -846,6 +918,7 @@
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "version": "tsc -v",
     "test": "npm run compile && node ./out/test/runTests.js",
+    "test:wot": "npm run compile && node ./out/test/runWotTests.js",
     "simulator:clean": "rimraf resources/simulator/scripts",
     "welcome:clean": "rimraf resources/welcome/scripts",
     "resources:clean": "npm run simulator:clean && npm run welcome:clean",
@@ -861,7 +934,7 @@
     "@types/node": "^20.19.41",
     "@types/node-fetch": "^2.5.7",
     "@types/terser-webpack-plugin": "^5.0.3",
-    "@types/vscode": "^1.75.0",
+    "@types/vscode": "~1.90.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vscode/test-electron": "^2.5.2",
@@ -901,6 +974,7 @@
     "express": "^4.22.2",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
+    "jsonc-parser": "^3.3.1",
     "replace-in-file": "^6.1.0",
     "strip-json-comments": "^3.1.1",
     "uuid": "^10.0.0",
